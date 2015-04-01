@@ -1,17 +1,17 @@
-__author__ = 'mthepyromaniac'
 
 import twilio
 import twilio.rest
 from twilio.rest import TwilioRestClient
 import twilio.twiml
 import praw
+import re
 from apscheduler.schedulers.blocking import BlockingScheduler
+import urllib
 
 account_sid = "sid"
 auth_token = "token"
 toNumber = "number"
 fromNumber = "number"
-headline = "something"
 
 
 sched = BlockingScheduler()
@@ -30,14 +30,13 @@ def scheduled_job():
     MakeCall()
 
 
-def MakeCall(): #ask twilio to place a call
-    headline = str(RedditHeadline()) #use reddit headline function to pull in headline then change it to string
-    headline = headline[7:] #remove the xxxx :: at the beginning of each headline
-    headline = headline.replace(" ","%20") #format leftover string so it fits into twimlet url properly
+ddef MakeCall(): #ask twilio to place a call
+    url = "http://twimlets.com/message?Message%5B0%5D=" #first portion of twilio message URL
+    headline = urllib.quote("Hello. Michelle Rooy. The top reddit headline for today is " + re.sub(r'[^a-zA-Z ]+', '', RedditHeadline()).encode('utf8')) #URL encode the message to be played once call is picked up
     try:
         call = client.calls.create(to=toNumber, #place actual call
                            from_=fromNumber,
-                           url="http://twimlets.com/echo?Twiml=%3C%3Fxml%20version%3D%221.0%22%20encoding%3D%22UTF-8%22%3F%3E%3CResponse%3E%3CSay%20voice%3D%22alice%22%3EHello.%20Michelle%20Rooy.%20The%20top%20reddit%20headline%20for%20today%20is%20%7B%7B%20"+ headline + "%20%7D%7D%20%3C%2FSay%3E%3C%2FResponse%3E&")
+                           url=url + headline) #concatenate url and headline strings to create a complete twilio message url
         print(headline)
     except twilio.rest.TwilioException as e: #error handling
         print e
@@ -46,8 +45,8 @@ def MakeCall(): #ask twilio to place a call
 def RedditHeadline(): #pull in headline
     submissions = userAgent.get_front_page(limit=1) #look at front page, pull in the number of headlines detailed by the limit
     for item in submissions:
-        return item
+        return item.title
 
-
-sched.start() #Start the schedule
+if __name__ == '__main__':
+    sched.start() #Start the schedule
 #MakeCall() #for testing purposes
