@@ -30,7 +30,7 @@ def scheduled_job():
     MakeCall()
 
 
-def MakeCall(): #ask twilio to place a call
+ddef MakeCall(): #ask twilio to place a call
     url = "http://twimlets.com/message?Message%5B0%5D=" #first portion of twilio message URL
     headline = urllib.quote("Hello. Michelle Rooy. The top reddit headline for today is " + re.sub(r'[^a-zA-Z ]+', '', RedditHeadline()).encode('utf8')) #URL encode the message to be played once call is picked up
     try:
